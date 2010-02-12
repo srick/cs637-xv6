@@ -19,4 +19,5 @@
 #define SYS_getpid 18
 #define SYS_sbrk   19
 #define SYS_sleep  20
+#define SYS_lotto  21
 #define SYS_tim    69

@@ -511,3 +511,9 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int
+lotto(int pid, int tickets)
+{
+  return 0;
+}

@@ -84,3 +84,17 @@ sys_tim(void)
 {
   return ticks;
 }
+
+int
+sys_lotto(void)
+{
+  int pid, tickets;
+
+  if(argint(0, &pid) < 0)
+    return -1;
+  
+  if(argint(1, &tickets) < 0)
+    return -1;
+
+  return lotto(pid, tickets);
+}

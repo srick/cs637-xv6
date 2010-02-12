@@ -22,6 +22,7 @@ int getpid();
 char* sbrk(int);
 int sleep(int);
 int tim(void);
+int lotto(int, int);
 
 // ulib.c
 int stat(char*, struct stat*);
