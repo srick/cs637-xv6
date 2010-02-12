@@ -5,6 +5,7 @@
 #define SEG_UDATA 4
 #define SEG_TSS   5  // this process's task state
 #define NSEGS     6
+#define BIRTH_TICKETS 100
 
 // Saved registers for kernel context switches.
 // Don't need to save all the %fs etc. segment registers,
@@ -41,6 +42,7 @@ struct proc {
   struct context context;   // Switch here to run process
   struct trapframe *tf;     // Trap frame for current interrupt
   char name[16];            // Process name (debugging)
+  int tickets;              // Number of tickets for lottery scheduling
 };
 
 // Process memory is laid out contiguously, low addresses first:

@@ -11,6 +11,7 @@ struct spinlock proc_table_lock;
 struct proc proc[NPROC];
 static struct proc *initproc;
 
+int total_tickets = 0;
 int nextpid = 1;
 extern void forkret(void);
 extern void forkret1(struct trapframe*);
@@ -35,6 +36,8 @@ allocproc(void)
     p = &proc[i];
     if(p->state == UNUSED){
       p->state = EMBRYO;
+      p->tickets = BIRTH_TICKETS;
+      total_tickets += BIRTH_TICKETS;
       p->pid = nextpid++;
       release(&proc_table_lock);
       return p;
@@ -174,6 +177,7 @@ userinit(void)
   memmove(p->mem, _binary_initcode_start, (int)_binary_initcode_size);
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->state = RUNNABLE;
+  p->tickets = 100;
   
   initproc = p;
 }
@@ -188,6 +192,15 @@ curproc(void)
   p = cpus[cpu()].curproc;
   popcli();
   return p;
+}
+
+// Stolen directly from Wikipedia!
+static 
+unsigned long
+lcg_rand(unsigned long a)
+{
+  //return 0;
+  return (a * 279470273UL) % 4294967291UL;
 }
 
 // Per-CPU process scheduler.
@@ -206,15 +219,27 @@ scheduler(void)
 
   c = &cpus[cpu()];
   for(;;){
+
+    // Lottery Time!
+    uint num = lcg_rand((unsigned long)100);
+    // cprintf("Number: %d\n", num%1000);
+    num %= total_tickets;
+    int sum = 0;
+    
     // Enable interrupts on this processor.
     sti();
 
     // Loop over process table looking for process to run.
     acquire(&proc_table_lock);
     for(i = 0; i < NPROC; i++){
+      cprintf("Sum: %d, num: %d, total_tickets: %d\n", sum, num, total_tickets);
       p = &proc[i];
       if(p->state != RUNNABLE)
         continue;
+      if(p->tickets + sum <= num) {
+	sum += p->tickets;
+	continue;
+      }
 
       // Switch to chosen process.  It is the process's job
       // to release proc_table_lock and then reacquire it
@@ -257,6 +282,7 @@ yield(void)
 {
   acquire(&proc_table_lock);
   cp->state = RUNNABLE;
+  // Compensation tickets would go here
   sched();
   release(&proc_table_lock);
 }
@@ -298,6 +324,7 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   cp->chan = chan;
   cp->state = SLEEPING;
+  total_tickets -= cp->tickets;
   sched();
 
   // Tidy up.
@@ -318,8 +345,10 @@ wakeup1(void *chan)
   struct proc *p;
 
   for(p = proc; p < &proc[NPROC]; p++)
-    if(p->state == SLEEPING && p->chan == chan)
+    if(p->state == SLEEPING && p->chan == chan) {
       p->state = RUNNABLE;
+      total_tickets += p->tickets;
+    }
 }
 
 // Wake up all processes sleeping on chan.
@@ -344,8 +373,10 @@ kill(int pid)
     if(p->pid == pid){
       p->killed = 1;
       // Wake process from sleep if necessary.
-      if(p->state == SLEEPING)
+      if(p->state == SLEEPING) {
         p->state = RUNNABLE;
+	total_tickets -= p->tickets;
+      }
       release(&proc_table_lock);
       return 0;
     }
@@ -394,6 +425,7 @@ exit(void)
   // Jump into the scheduler, never to return.
   cp->killed = 0;
   cp->state = ZOMBIE;
+  total_tickets -= cp->tickets;
   sched();
   panic("zombie exit");
 }
@@ -421,6 +453,7 @@ wait(void)
           kfree(p->kstack, KSTACKSIZE);
           pid = p->pid;
           p->state = UNUSED;
+	  total_tickets -= p->tickets;
           p->pid = 0;
           p->parent = 0;
           p->name[0] = 0;
@@ -478,4 +511,3 @@ procdump(void)
     cprintf("\n");
   }
 }
-
