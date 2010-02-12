@@ -222,7 +222,7 @@ scheduler(void)
   for(;;){
 
     // Lottery Time!
-    num = lcg_rand((unsigned long)100);
+    num = lcg_rand((unsigned long)ticks);
     // cprintf("Number: %d\n", num%1000);
     if(total_tickets)
       num %= total_tickets;
@@ -519,19 +519,26 @@ procdump(void)
 int
 lotto(int pid, int tickets)
 {
+  int i;
   struct proc *p;
   
   acquire(&proc_table_lock);
-  if(pid >= NPROC)
-    return -1; 
-  p = &proc[pid];
-  if(p->state == UNUSED)  
-    return -1;
 
-  total_tickets += (tickets - p->tickets);
-  p->tickets = tickets;
-
+  for(i = 0; i < NPROC; i++){
+    p = &proc[i];
+    
+    if(p->pid != pid)
+      continue;
+    
+    if(p->state == UNUSED)  
+      return -1;
+    
+    total_tickets += (tickets - p->tickets);
+    p->tickets = tickets;
+    release(&proc_table_lock);
+    return 0;
+  }
+  
   release(&proc_table_lock);
-
-  return 0;
+  return -1;
 }
