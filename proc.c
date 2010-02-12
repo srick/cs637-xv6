@@ -215,16 +215,19 @@ scheduler(void)
 {
   struct proc *p;
   struct cpu *c;
-  int i;
+  uint num;
+  int i, sum;
 
   c = &cpus[cpu()];
   for(;;){
 
     // Lottery Time!
-    uint num = lcg_rand((unsigned long)100);
+    num = lcg_rand((unsigned long)100);
     // cprintf("Number: %d\n", num%1000);
-    num %= total_tickets;
-    int sum = 0;
+    if(total_tickets)
+      num %= total_tickets;
+    else
+      num = 0;
     
     // Enable interrupts on this processor.
     sti();
@@ -232,7 +235,7 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&proc_table_lock);
     for(i = 0; i < NPROC; i++){
-      cprintf("Sum: %d, num: %d, total_tickets: %d\n", sum, num, total_tickets);
+      //      cprintf("Sum: %d, num: %d, total_tickets: %d\n", sum, num, total_tickets);
       p = &proc[i];
       if(p->state != RUNNABLE)
         continue;
@@ -494,6 +497,7 @@ procdump(void)
   char *state;
   uint pc[10];
   
+  cprintf("\n");
   for(i = 0; i < NPROC; i++){
     p = &proc[i];
     if(p->state == UNUSED)
@@ -502,7 +506,7 @@ procdump(void)
       state = states[p->state];
     else
       state = "???";
-    cprintf("%d %s %s", p->pid, state, p->name);
+    cprintf("%d %s %s %d", p->pid, state, p->name, p->tickets);
     if(p->state == SLEEPING){
       getcallerpcs((uint*)p->context.ebp+2, pc);
       for(j=0; j<10 && pc[j] != 0; j++)
@@ -515,5 +519,19 @@ procdump(void)
 int
 lotto(int pid, int tickets)
 {
+  struct proc *p;
+  
+  acquire(&proc_table_lock);
+  if(pid >= NPROC)
+    return -1; 
+  p = &proc[pid];
+  if(p->state == UNUSED)  
+    return -1;
+
+  total_tickets += (tickets - p->tickets);
+  p->tickets = tickets;
+
+  release(&proc_table_lock);
+
   return 0;
 }

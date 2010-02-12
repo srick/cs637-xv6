@@ -17,13 +17,7 @@ main(int argc, char *argv[])
     exit();
   }
   
-  if(argv[2][0] == '-'){
-    argv[2][0] = '0';
-    tickets = -(atoi(argv[2]));
-  }
-  else    
-    tickets = atoi(argv[2]);
-
+  tickets = atoi(argv[2]);
   if(tickets <= 0){
     printf(1, "tickets must be a non zero number\n");
     exit();
