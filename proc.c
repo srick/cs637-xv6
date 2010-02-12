@@ -224,7 +224,7 @@ scheduler(void)
     // Lottery Time!
     num = lcg_rand((unsigned long)ticks);
     // cprintf("Number: %d\n", num%1000);
-    if(total_tickets)
+    if(total_tickets > 0)
       num %= total_tickets;
     else
       num = 0;
@@ -378,7 +378,6 @@ kill(int pid)
       // Wake process from sleep if necessary.
       if(p->state == SLEEPING) {
         p->state = RUNNABLE;
-	total_tickets -= p->tickets;
       }
       release(&proc_table_lock);
       return 0;
@@ -412,7 +411,8 @@ exit(void)
   cp->cwd = 0;
 
   acquire(&proc_table_lock);
-
+  total_tickets -= cp->tickets;
+ 
   // Parent might be sleeping in wait().
   wakeup1(cp->parent);
 
@@ -428,7 +428,6 @@ exit(void)
   // Jump into the scheduler, never to return.
   cp->killed = 0;
   cp->state = ZOMBIE;
-  total_tickets -= cp->tickets;
   sched();
   panic("zombie exit");
 }
@@ -456,7 +455,6 @@ wait(void)
           kfree(p->kstack, KSTACKSIZE);
           pid = p->pid;
           p->state = UNUSED;
-	  total_tickets -= p->tickets;
           p->pid = 0;
           p->parent = 0;
           p->name[0] = 0;
@@ -497,7 +495,7 @@ procdump(void)
   char *state;
   uint pc[10];
   
-  cprintf("\n");
+  cprintf("\n total tickets: %d\n", total_tickets);
   for(i = 0; i < NPROC; i++){
     p = &proc[i];
     if(p->state == UNUSED)
@@ -532,8 +530,9 @@ lotto(int pid, int tickets)
     
     if(p->state == UNUSED)  
       return -1;
-    
-    total_tickets += (tickets - p->tickets);
+
+    if(p->state == RUNNING || p->state == RUNNABLE)
+      total_tickets += (tickets - p->tickets);
     p->tickets = tickets;
     release(&proc_table_lock);
     return 0;

@@ -24,7 +24,7 @@ main(int argc, char *argv[])
   }
   
   if(lotto(pid, tickets))
-    printf(1, "lotto failed!\n");
+    printf(1, "lotto failed - check pid\n");
 
   exit();
 }
