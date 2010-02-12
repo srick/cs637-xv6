@@ -228,14 +228,15 @@ scheduler(void)
       num %= total_tickets;
     else
       num = 0;
-    
+    // reset sum
+    sum = 0;
     // Enable interrupts on this processor.
     sti();
 
     // Loop over process table looking for process to run.
     acquire(&proc_table_lock);
     for(i = 0; i < NPROC; i++){
-      //      cprintf("Sum: %d, num: %d, total_tickets: %d\n", sum, num, total_tickets);
+
       p = &proc[i];
       if(p->state != RUNNABLE)
         continue;
@@ -243,7 +244,6 @@ scheduler(void)
 	sum += p->tickets;
 	continue;
       }
-
       // Switch to chosen process.  It is the process's job
       // to release proc_table_lock and then reacquire it
       // before jumping back to us.

@@ -2,21 +2,18 @@
 #include "stat.h"
 #include "user.h"
 
-
 int
-spin(int n)
+spin(int n, int t0)
 {
-  int t0, tf;
+  int tf;
 
-  volatile uint balls = 82345678;
+  volatile uint balls = 0;
   t0 = tim();
 
-  while(balls--);
+  while((tim() - t0) < 10000)
+    balls++;
   
-  tf = tim() - t0;
-   
-  printf(1, "Spinner %d: %d ticks\n",n, tf);
-
+  printf(1, "Spinner %d: %d balls\n", n, balls);
   exit();
 }
 
@@ -24,16 +21,19 @@ int
 main(int argc, char *argv[])
 {
   int kid1;
+  int t0 = tim();
+  int num = atoi(argv[1]);
+
 
   kid1 = fork();
   
   if(kid1 == 0)
-    spin(800);
+    spin(num, t0);
 
 
   if(kid1 > 0){
-    lotto(kid1, 800);
-    spin(100);
+    lotto(kid1, num);
+    spin(100, t0);
   }
   
   exit();
