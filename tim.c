@@ -2,16 +2,15 @@
 #include "stat.h"
 #include "user.h"
 
+static
 int
 spin(int n, int t0)
 {
-  int tf;
-
   volatile uint balls = 0;
-  t0 = tim();
 
-  while((tim() - t0) < 10000)
+  while((tim() - t0) < 10000) {
     balls++;
+  }
   
   printf(1, "Spinner %d: %d balls\n", n, balls);
   exit();
@@ -24,7 +23,6 @@ main(int argc, char *argv[])
   int t0 = tim();
   int num = atoi(argv[1]);
 
-
   kid1 = fork();
   
   if(kid1 == 0)
@@ -33,7 +31,7 @@ main(int argc, char *argv[])
 
   if(kid1 > 0){
     lotto(kid1, num);
-    spin(100, t0);
+    spin(1000, t0);
   }
   
   exit();

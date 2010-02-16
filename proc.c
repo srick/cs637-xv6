@@ -37,6 +37,7 @@ allocproc(void)
     if(p->state == UNUSED){
       p->state = EMBRYO;
       p->tickets = BIRTH_TICKETS;
+      p->ran = 0;
       total_tickets += BIRTH_TICKETS;
       p->pid = nextpid++;
       release(&proc_table_lock);
@@ -177,7 +178,7 @@ userinit(void)
   memmove(p->mem, _binary_initcode_start, (int)_binary_initcode_size);
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->state = RUNNABLE;
-  p->tickets = 100;
+  p->tickets = BIRTH_TICKETS;
   
   initproc = p;
 }
@@ -196,10 +197,9 @@ curproc(void)
 
 // Stolen directly from Wikipedia!
 static 
-unsigned long
+unsigned long 
 lcg_rand(unsigned long a)
 {
-  //return 0;
   return (a * 279470273UL) % 4294967291UL;
 }
 
@@ -215,14 +215,16 @@ scheduler(void)
 {
   struct proc *p;
   struct cpu *c;
-  uint num;
-  int i, sum;
-
+  unsigned long num;
+  int i, sum, seed;
+  seed = 0;
   c = &cpus[cpu()];
   for(;;){
-
+    
+    seed++;
     // Lottery Time!
-    num = lcg_rand((unsigned long)ticks);
+    //ticksval = ticks;
+    num = lcg_rand(lcg_rand(seed*ticks));
     // cprintf("Number: %d\n", num%1000);
     if(total_tickets > 0)
       num %= total_tickets;
@@ -236,7 +238,7 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&proc_table_lock);
     for(i = 0; i < NPROC; i++){
-
+      
       p = &proc[i];
       if(p->state != RUNNABLE)
         continue;
@@ -247,15 +249,18 @@ scheduler(void)
       // Switch to chosen process.  It is the process's job
       // to release proc_table_lock and then reacquire it
       // before jumping back to us.
+
       c->curproc = p;
       setupsegs(p);
       p->state = RUNNING;
+      p->ran++;
       swtch(&c->context, &p->context);
-
+      
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->curproc = 0;
       setupsegs(0);
+      break;
     }
     release(&proc_table_lock);
 
@@ -494,7 +499,7 @@ procdump(void)
   struct proc *p;
   char *state;
   uint pc[10];
-  
+
   cprintf("\n total tickets: %d\n", total_tickets);
   for(i = 0; i < NPROC; i++){
     p = &proc[i];
@@ -504,7 +509,7 @@ procdump(void)
       state = states[p->state];
     else
       state = "???";
-    cprintf("%d %s %s %d", p->pid, state, p->name, p->tickets);
+    cprintf("%d %s %s %d %d", p->pid, state, p->name, p->tickets, p->ran);
     if(p->state == SLEEPING){
       getcallerpcs((uint*)p->context.ebp+2, pc);
       for(j=0; j<10 && pc[j] != 0; j++)

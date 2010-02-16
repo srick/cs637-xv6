@@ -43,6 +43,7 @@ struct proc {
   struct trapframe *tf;     // Trap frame for current interrupt
   char name[16];            // Process name (debugging)
   int tickets;              // Number of tickets for lottery scheduling
+  int ran;                  // Number of times that the scheduler has run this process
 };
 
 // Process memory is laid out contiguously, low addresses first:
