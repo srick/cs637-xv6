@@ -150,6 +150,51 @@ copyproc(struct proc *p)
   return np;
 }
 
+// Create a new process copying p as the parent.
+// Sets up stack to return as if from system call.
+// Caller must set state of returned proc to RUNNABLE.
+struct proc*
+thread(struct proc *p, void *sp)
+{
+  int i;
+  struct proc *np;
+
+  // Allocate process.
+  if((np = allocproc()) == 0)
+    return 0;
+
+  // Allocate kernel stack.
+  if((np->kstack = kalloc(KSTACKSIZE)) == 0){
+    np->state = UNUSED;
+    return 0;
+  }
+  np->tf = (struct trapframe*)(np->kstack + KSTACKSIZE) - 1;
+
+  if(p){  // Copy process state from p.
+    np->parent = p;
+    memmove(np->tf, p->tf, sizeof(*np->tf));
+  
+    np->sz = p->sz;
+    np->mem = p->mem;
+
+    for(i = 0; i < NOFILE; i++)
+      if(p->ofile[i])
+        np->ofile[i] = filedup(p->ofile[i]);
+    np->cwd = idup(p->cwd);
+  }
+
+  // Set up new context to start executing at forkret (see below).
+  memset(&np->context, 0, sizeof(np->context));
+  np->context.eip = (uint)forkret;
+  np->context.esp = (uint)np->tf;
+
+  np->tf->esp = (uint)sp;
+
+  // Clear %eax so that fork system call returns 0 in child.
+  np->tf->eax = 0;
+  return np;
+}
+
 // Set up first user process.
 void
 userinit(void)

@@ -18,6 +18,23 @@ sys_fork(void)
 }
 
 int
+sys_thread(void)
+{
+  int pid;
+  void *sp;
+  struct proc *np;
+
+  if(argint(0, &sp) < 0)
+    return -1;
+
+  if((np = thread(cp, sp)) == 0)
+    return -1;
+  pid = np->pid;
+  np->state = RUNNABLE;
+  return pid;
+}
+
+int
 sys_exit(void)
 {
   exit();
