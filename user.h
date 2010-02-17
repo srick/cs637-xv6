@@ -23,7 +23,6 @@ char* sbrk(int);
 int sleep(int);
 int tim(void);
 int lotto(int, int);
-int thread_create(void *(start_routine)(void*), void *arg);
 
 // ulib.c
 int stat(char*, struct stat*);
