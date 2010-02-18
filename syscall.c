@@ -99,6 +99,7 @@ extern int sys_write(void);
 extern int sys_tim(void);
 extern int sys_lotto(void);
 extern int sys_thread(void);
+extern int sys_thread_wait(void);
 
 static int (*syscalls[])(void) = {
 [SYS_chdir]   sys_chdir,
@@ -124,6 +125,7 @@ static int (*syscalls[])(void) = {
 [SYS_tim]     sys_tim,
 [SYS_lotto]   sys_lotto,
 [SYS_thread]  sys_thread,
+[SYS_thread_wait] sys_thread_wait,
 };
 
 void

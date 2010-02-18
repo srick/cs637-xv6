@@ -21,13 +21,13 @@ int
 sys_thread(void)
 {
   int pid;
-  void *sp;
+  int sp;
   struct proc *np;
 
   if(argint(0, &sp) < 0)
     return -1;
 
-  if((np = thread(cp, sp)) == 0)
+  if((np = thread(cp,(void*) sp)) == 0)
     return -1;
   pid = np->pid;
   np->state = RUNNABLE;
@@ -45,6 +45,12 @@ int
 sys_wait(void)
 {
   return wait();
+}
+
+int
+sys_thread_wait(void)
+{
+  return thread_wait();
 }
 
 int

@@ -526,6 +526,50 @@ wait(void)
   }
 }
 
+// Wait for a child process to exit and return its pid.
+// Return -1 if this process has no children.
+int
+thread_wait(void)
+{
+  struct proc *p;
+  int i, havekids, pid;
+
+  acquire(&proc_table_lock);
+  for(;;){
+    // Scan through table looking for zombie children.
+    havekids = 0;
+    for(i = 0; i < NPROC; i++){
+      p = &proc[i];
+      if(p->state == UNUSED)
+        continue;
+      if(p->parent == cp){
+        if(p->state == ZOMBIE){
+          // Found one.
+          // kfree(p->mem, p->sz);
+          kfree(p->kstack, KSTACKSIZE);
+          pid = p->pid;
+          p->state = UNUSED;
+          p->pid = 0;
+          p->parent = 0;
+          p->name[0] = 0;
+          release(&proc_table_lock);
+          return pid;
+        }
+        havekids = 1;
+      }
+    }
+
+    // No point waiting if we don't have any children.
+    if(!havekids || cp->killed){
+      release(&proc_table_lock);
+      return -1;
+    }
+
+    // Wait for children to exit.  (See wakeup1 call in proc_exit.)
+    sleep(cp, &proc_table_lock);
+  }
+}
+
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
 // No lock to avoid wedging a stuck machine further.

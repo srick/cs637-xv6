@@ -22,3 +22,4 @@
 #define SYS_lotto  21
 #define SYS_tim    22
 #define SYS_thread 23
+#define SYS_thread_wait 24
