@@ -178,7 +178,7 @@ thread(struct proc *p, void *sp)
     np->mem = p->mem;
 
     // FULL OF WIN!!!
-    memmove((p->mem + (uint)sp),(p->mem + p->tf->esp), 8); 
+    memmove((np->mem + (uint)sp),(p->mem + p->tf->esp) - 12, 12); 
     
     for(i = 0; i < NOFILE; i++)
       if(p->ofile[i])
