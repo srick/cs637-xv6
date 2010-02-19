@@ -177,6 +177,9 @@ thread(struct proc *p, void *sp)
     np->sz = p->sz;
     np->mem = p->mem;
 
+    // FULL OF WIN!!!
+    memmove((p->mem + (uint)sp),(p->mem + p->tf->esp), 8); 
+    
     for(i = 0; i < NOFILE; i++)
       if(p->ofile[i])
         np->ofile[i] = filedup(p->ofile[i]);

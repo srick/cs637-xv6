@@ -3,28 +3,43 @@
 #include "thread.h"
 
 void
-work(int *p)
+WTF(int *p) // work time fun
 {
-  int x;
-  printf(1, "I LOVE THREADS: %x[%x]\n", p, &p);
-  printf(1, "I LOVE THREADS: %x[%x]\n", x, &x);
-
-  //  tim();
+  printf(1, "8=====D - - - %d\n", *p);
   exit();
 }
 
+void
+work1(int *p)
+{
+  int x, t0;
+  printf(1, "PICARD: (%d) %x [%x]\n",*p, p, &p);
+  thread_create(WTF, p);
+  thread_wait();
+  thread_create(WTF, p);
+  thread_wait();
+  thread_create(WTF, p);
+  thread_wait();
+  exit();
+}
+
+void
+work(int *p)
+{
+  int x, t0;
+  printf(1, "I LOVE THREADS: (%d) %x [%x]\n",*p, p, &p);
+  thread_create(work1, p);
+  thread_wait();
+  exit();
+}
 
 int
 main(int argc, char* argv[])
 {
   int tid;
-  int i = 0;
-  printf(1, "calling thread_create %x\n", &i);
-
-  tid = thread_create(&work, &i);
-  printf(1, "tid: %d\n", tid);
-  tim();
+  int i = 456;
+  tid = thread_create(work, &i);
+  printf(1, "spawn %d overlords\n", tid);
   thread_wait();
-  printf(1, "result: %d\n", i);
   exit();
 }
