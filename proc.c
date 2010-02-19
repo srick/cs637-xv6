@@ -187,9 +187,9 @@ thread(struct proc *p, void *sp)
   memset(&np->context, 0, sizeof(np->context));
   np->context.eip = (uint)forkret;
   np->context.esp = (uint)np->tf;
-
+  
   np->tf->esp = (uint)sp;
-
+  
   // Clear %eax so that fork system call returns 0 in child.
   np->tf->eax = 0;
   return np;
@@ -270,7 +270,7 @@ scheduler(void)
     // Lottery Time!
     //ticksval = ticks;
     num = lcg_rand(lcg_rand(seed*ticks));
-    // cprintf("Number: %d\n", num%1000);
+
     if(total_tickets > 0)
       num %= total_tickets;
     else

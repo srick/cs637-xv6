@@ -106,9 +106,10 @@ UPROGS=\
 	_mkdir\
 	_rm\
 	_sh\
-	_usertests\
 	_wc\
 	_zombie\
+	_lotto\
+	_tim\
 	_test\
 
 fs.img: mkfs README $(UPROGS)
