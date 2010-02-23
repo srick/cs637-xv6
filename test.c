@@ -2,18 +2,18 @@
 #include "user.h"
 #include "thread.h"
 
-void
-WTF(int *p) // work time fun
+void*
+WTF(void *p) // work time fun
 {
-  printf(1, "thread %d[%x]\n", *p, p);
+  printf(1, "thread %d[%x]\n", *(int*)p, p);
   exit();
 }
 
-void
-work1(int *p)
+void*
+work1(void *p)
 {
-  int a, b, c, x, t0;
-  printf(1, "caller thread: (%d) %x [%x]\n",*p, p, &p);
+  int a, b, c;
+  printf(1, "caller thread: (%d) %x [%x]\n",*(int*)p, p, &p);
   a = thread_create(WTF, &a);
   b = thread_create(WTF, &b);
   c = thread_create(WTF, &c);
@@ -25,7 +25,6 @@ int
 main(int argc, char* argv[])
 {
   int a, b, c;
-  int i = 456;
   a = thread_create(WTF, &a);
   thread_wait();
   b = thread_create(WTF, &b);

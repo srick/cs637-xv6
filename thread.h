@@ -8,7 +8,7 @@
 
 static int 
 thread_create( void *(*start_routine)(void*), void *arg){
-  void *sp = malloc(64);
+  void *sp = malloc(4096);
   // printf(1, "sp = %x\n", sp);
   int pid = thread(sp);
   if(!pid) (*start_routine)(arg);

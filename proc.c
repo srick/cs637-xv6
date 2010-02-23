@@ -193,7 +193,7 @@ thread(struct proc *p, void *sp)
   np->context.eip = (uint)forkret;
   np->context.esp = (uint)np->tf;
   
-  np->tf->esp = (uint)sp;
+  np->tf->esp = (uint)(sp);
   
   // Clear %eax so that fork system call returns 0 in child.
   np->tf->eax = 0;
