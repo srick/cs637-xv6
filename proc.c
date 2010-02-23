@@ -38,6 +38,7 @@ allocproc(void)
       p->state = EMBRYO;
       p->tickets = BIRTH_TICKETS;
       p->ran = 0;
+      p->threads = 0;
       total_tickets += BIRTH_TICKETS;
       p->pid = nextpid++;
       release(&proc_table_lock);
@@ -178,8 +179,9 @@ thread(struct proc *p, void *sp)
     np->mem = p->mem;
 
     // FULL OF WIN!!!
-    memmove((np->mem + (uint)sp),(p->mem + p->tf->esp) - 12, 12); 
-    
+    memmove((np->mem + (uint)sp),(p->mem + p->tf->esp), 8); 
+    p->threads++;
+
     for(i = 0; i < NOFILE; i++)
       if(p->ofile[i])
         np->ofile[i] = filedup(p->ofile[i]);
@@ -529,7 +531,7 @@ wait(void)
   }
 }
 
-// Wait for a child process to exit and return its pid.
+// Wait for all child process to exit and return its pid.
 // Return -1 if this process has no children.
 int
 thread_wait(void)
@@ -555,19 +557,24 @@ thread_wait(void)
           p->pid = 0;
           p->parent = 0;
           p->name[0] = 0;
-          release(&proc_table_lock);
-          return pid;
+	  cp->threads--;
+          // release(&proc_table_lock);
+          // return pid;
         }
         havekids = 1;
       }
     }
-
+    
     // No point waiting if we don't have any children.
     if(!havekids || cp->killed){
       release(&proc_table_lock);
       return -1;
     }
-
+    
+    if(!cp->threads){
+      release(&proc_table_lock);
+      return 0;
+    }
     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
     sleep(cp, &proc_table_lock);
   }
