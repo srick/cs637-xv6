@@ -128,6 +128,8 @@ static int (*syscalls[])(void) = {
 [SYS_lotto]   sys_lotto,
 [SYS_thread]  sys_thread,
 [SYS_thread_wait] sys_thread_wait,
+[SYS_cond_sleep] sys_cond_sleep,
+[SYS_cond_wake] sys_cond_wake,
 };
 
 void

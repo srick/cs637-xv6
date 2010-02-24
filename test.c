@@ -20,10 +20,10 @@ work1(void *p)
   mutex_lock(&lock);
   printf(1, "caller thread: (%d) %x [%x]\n",*(int*)p, p, &p);
   mutex_unlock(&lock);
-  a = thread_create(WTF, &a);
-  b = thread_create(WTF, &b);
-  c = thread_create(WTF, &c);
-  thread_wait();
+  //  a = thread_create(WTF, &a);
+  //  b = thread_create(WTF, &b);
+  //  c = thread_create(WTF, &c);
+  //  thread_wait();
   exit();
 }
 
@@ -32,10 +32,11 @@ main(int argc, char* argv[])
 {
   int a, b, c;
   mutex_init(&lock);
-  a = thread_create(work1, &a);
+  printf(1, "r: %x a: %x\n", &(WTF), &a);
+  a = thread_create(&WTF, &a);
   thread_wait();
-  b = thread_create(work1, &b);
-  c = thread_create(work1, &c);
-  thread_wait();
+  //  b = thread_create(WTF, &b);
+  // c = thread_create(work1, &c);
+  // thread_wait();
   exit();
 }

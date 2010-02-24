@@ -16,28 +16,30 @@ void mutex_lock(mutex_t *m)
 
 void mutex_unlock(mutex_t *m)
 {
-    m->flag = 0;
+  m->flag = 0;
 } 
 
-void
-cond_wait(cond_t *c, mutex_t *m)
+void cond_init(cond_t *c)
 {
-  
-
+  c->chan = 0;
 }
 
-void
-cond_signal(cond_t *c)
+void cond_wait(cond_t *c, mutex_t *m)
 {
-
-
+  mutex_unlock(m);
+  cond_sleep(&(c->chan));
+  mutex_lock(m);
 }
 
-int
-thread_create( void *(*start_routine)(void*), void *arg)
+void cond_signal(cond_t *c)
+{
+  cond_wake(&(c->chan));
+}
+
+int thread_create( void *(*start_routine)(void*), void *arg)
 {
   void *sp = malloc(1024);
   int pid = thread(sp);
   if(!pid) (*start_routine)(arg);
-  return pid;
+  else return pid;
 }

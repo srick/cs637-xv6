@@ -3,6 +3,7 @@
 #include "param.h"
 #include "mmu.h"
 #include "proc.h"
+#include "spinlock.h"
 
 int
 sys_fork(void)
@@ -127,9 +128,13 @@ int
 sys_cond_sleep(void)
 {
   void *chan;
-  
+  struct spinlock lock;
   argptr(0, &chan, 4);
-  sleep(chan, 0);
+  cprintf("sp ch %x\n", chan);
+  initlock(&lock, "temp");
+  acquire(&lock);
+  sleep(chan, &lock);
+  release(&lock);
   return 0;
 }
 
@@ -137,8 +142,8 @@ int
 sys_cond_wake(void)
 {
   void *chan;
-
   argptr(0, &chan, 4);
+  cprintf("wk ch %x\n", chan);
   wakeup(chan);
   return 0;
 }

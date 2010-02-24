@@ -177,9 +177,6 @@ thread(struct proc *p, void *sp)
   
     np->sz = p->sz;
     np->mem = p->mem;
-
-    // FULL OF WIN!!!
-    memmove((np->mem + (uint)sp),(p->mem + p->tf->esp), 24); 
     p->threads++;
 
     for(i = 0; i < NOFILE; i++)
@@ -193,7 +190,8 @@ thread(struct proc *p, void *sp)
   np->context.eip = (uint)forkret;
   np->context.esp = (uint)np->tf;
   
-  np->tf->esp = (uint)(sp);
+  np->tf->esp = (uint)(sp) + 1024 - 12;
+  memmove(np->mem + (uint)np->tf->esp - 4, (p->mem + p->tf->esp) - 4, 12); 
   
   // Clear %eax so that fork system call returns 0 in child.
   np->tf->eax = 0;
