@@ -9,8 +9,8 @@ typedef struct cond{
 } cond_t;
 
 void mutex_init(mutex_t *m);
-int mutex_lock(mutex_t *m);
-int mutex_unlock(mutex_t *m); 
+void mutex_lock(mutex_t *m);
+void mutex_unlock(mutex_t *m); 
 void cond_init(cond_t *c);
-int cond_wait(cond_t *c, mutex_t *m);
-int cond_signal(cond_t *c);
+void cond_wait(cond_t *c, mutex_t *m);
+void cond_signal(cond_t *c);
