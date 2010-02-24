@@ -3,7 +3,6 @@
 #include "param.h"
 #include "mmu.h"
 #include "proc.h"
-#include "thread.h"
 
 int
 sys_fork(void)
@@ -127,14 +126,10 @@ sys_lotto(void)
 int
 sys_cond_sleep(void)
 {
-  mutex_t *lk;
   void *chan;
   
-  argptr(0, &lk, 4);
-  argptr(1, &chan, 4);
-  mutex_unlock(lk);
+  argptr(0, &chan, 4);
   sleep(chan, 0);
-  mutex_lock(lk);
   return 0;
 }
 

@@ -1,5 +1,6 @@
-#include "x86.h"
+#include "types.h"
 #include "user.h"
+#include "x86.h"
 #include "thread.h"
 
 void
