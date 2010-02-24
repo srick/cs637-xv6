@@ -179,7 +179,7 @@ thread(struct proc *p, void *sp)
     np->mem = p->mem;
 
     // FULL OF WIN!!!
-    memmove((np->mem + (uint)sp),(p->mem + p->tf->esp), 8); 
+    memmove((np->mem + (uint)sp),(p->mem + p->tf->esp), 24); 
     p->threads++;
 
     for(i = 0; i < NOFILE; i++)

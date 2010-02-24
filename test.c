@@ -25,11 +25,10 @@ int
 main(int argc, char* argv[])
 {
   int a, b, c;
-  a = thread_create(WTF, &a);
+  a = thread_create(work1, &a);
   thread_wait();
-  b = thread_create(WTF, &b);
-  c = thread_create(WTF, &c);
+  b = thread_create(work1, &b);
+  c = thread_create(work1, &c);
   thread_wait();
-  //for(;;);
   exit();
 }
