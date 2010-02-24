@@ -100,6 +100,8 @@ extern int sys_tim(void);
 extern int sys_lotto(void);
 extern int sys_thread(void);
 extern int sys_thread_wait(void);
+extern int sys_cond_sleep(void);
+extern int sys_cond_wake(void);
 
 static int (*syscalls[])(void) = {
 [SYS_chdir]   sys_chdir,

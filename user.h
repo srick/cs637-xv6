@@ -25,6 +25,8 @@ int tim(void);
 int lotto(int, int);
 int thread(void *);
 int thread_wait(void);
+int cond_sleep();
+int cond_wake();
 
 // ulib.c
 int stat(char*, struct stat*);

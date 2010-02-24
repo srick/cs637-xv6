@@ -3,6 +3,7 @@
 #include "param.h"
 #include "mmu.h"
 #include "proc.h"
+#include "thread.h"
 
 int
 sys_fork(void)
@@ -108,6 +109,7 @@ sys_tim(void)
   return ticks;
 }
 
+
 int
 sys_lotto(void)
 {
@@ -120,4 +122,28 @@ sys_lotto(void)
     return -1;
 
   return lotto(pid, tickets);
+}
+
+int
+sys_cond_sleep(void)
+{
+  mutex_t *lk;
+  void *chan;
+  
+  argptr(0, &lk, 4);
+  argptr(1, &chan, 4);
+  mutex_unlock(lk);
+  sleep(chan, 0);
+  mutex_lock(lk);
+  return 0;
+}
+
+int
+sys_cond_wake(void)
+{
+  void *chan;
+
+  argptr(0, &chan, 4);
+  wakeup(chan);
+  return 0;
 }
